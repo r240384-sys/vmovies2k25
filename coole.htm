@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COOLIE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient background */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("https://image.tmdb.org/t/p/original/egoyMDLqCxzjnSrWOz50uLlJWmD.jpg") no-repeat center center/cover;
+      filter: blur(18px) brightness(0.5);
+      z-index: -1;
+    }
+
+    header {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffdd57;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .movie-player video {
+      width: 100%;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+
+    .movie-info {
+      width: 100%;
+      background: rgba(0,0,0,0.6);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+    }
+
+    .movie-info h2 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: #1e90ff;
+      text-align: center;
+    }
+
+    .tags {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .tags span {
+      background: #1e90ff;
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin: 5px;
+      display: inline-block;
+    }
+
+    .rating {
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    .rating i {
+      color: gold;
+      margin-right: 3px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #1e90ff, #007bff);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 30px;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease-in-out;
+      margin: 10px auto;
+    }
+
+    .btn:hover {
+      transform: scale(1.08);
+      animation: glow 1.5s infinite alternate;
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: skewX(-25deg);
+    }
+
+    .btn:hover::after {
+      animation: shine 1s forwards;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 10px #1e90ff; }
+      to { box-shadow: 0 0 25px #007bff; }
+    }
+
+    @keyframes shine {
+      0% { left: -75%; }
+      100% { left: 125%; }
+    }
+
+    .download-section {
+      margin-top: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .download-btn {
+      background: linear-gradient(135deg, #28a745, #34d058);
+      padding: 12px 22px;
+      border-radius: 30px;
+      font-weight: bold;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .download-btn:hover {
+      transform: scale(1.08);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(40,167,69, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(40,167,69, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(40,167,69, 0); }
+    }
+
+    .download-options {
+      display: none;
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    /* Professional pill-shaped buttons */
+    .quality-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #1e90ff, #007bff);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-size: 15px;
+      font-weight: 600;
+      margin: 8px;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: all 0.3s ease-in-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quality-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+    }
+
+    /* Progress bar */
+    .progress {
+      width: 80%;
+      height: 12px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      margin: 15px auto;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #28a745, #34d058);
+      border-radius: 10px;
+      transition: width 0.2s linear;
+    }
+      iframe {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      position: relative;
+      width: 20cm;
+      margin-left: 260px;
+      height: 8cm;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>VMOVIES</h1>
+  </header>
+
+  
+ <iframe src="https://drive.google.com/file/d/1gdteDDFAgScbthy5A_oBdQaTfiZg49RW/preview" 
+          width="device-width" height="450" allow="autoplay" allowfullscreen></iframe>    </div>
+    <div class="movie-info">
+      <h2>KUBERAA</h2>
+      <div class="tags">
+        <span>Action</span><span>Drama</span><span>Telugu</span>
+      </div>
+      <p><strong>Year:</strong> 2025</p>
+      <p><strong>Cast:</strong>  Nagarjuna Akkineni, Dhanush, Rashmika Mandanna, Jim Sarbh</p>
+      <p>A thrilling action-packed story with powerful performances.</p>
+      <div class="rating">
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star-half-stroke"></i>
+        <i class="fa-regular fa-star"></i>
+        <span>4.2/5</span>
+      </div>
+      <div style="text-align:center;">
+        <a href="coole movie.html" class="btn"><i class="fa-solid fa-play"></i> Watch Now</a>
+      </div>
+
+      <div class="download-section">
+        <button class="download-btn" onclick="toggleOptions()">
+          <i class="fa-solid fa-download"></i> Download Movie
+        </button>
+        <div class="download-options" id="downloadOptions">
+          <button class="quality-btn" onclick="startDownload('Coolie.mp4')">480p</button>
+          <button class="quality-btn" onclick="startDownload('movie-720p.mp4')">720p</button>
+          <button class="quality-btn" onclick="startDownload('movie-1080p.mp4')">1080p</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleOptions() {
+      let options = document.getElementById("downloadOptions");
+      options.style.display = options.style.display === "block" ? "none" : "block";
+    }
+
+    function startDownload(fileUrl) {
+      let progress = document.querySelector(".progress");
+      let bar = document.getElementById("progressBar");
+      progress.style.display = "block";
+      bar.style.width = "0%";
+      let width = 0;
+
+      let interval = setInterval(() => {
+        if (width >= 100) {
+          clearInterval(interval);
+          // trigger real download
+          let link = document.createElement("a");
+          link.href = fileUrl;
+          link.download = fileUrl.split('/').pop();
+          link.click();
+        } else {
+          width++;
+          bar.style.width = width + "%";
+        }
+      }, 50); // speed
+    }
+  </script>
+</body>
+</html>
