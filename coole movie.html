@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VMOVIES Player</title>
+<style>
+body {
+  margin: 0;
+  background: #000;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+#playerContainer {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+.responsive-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Feedback overlay */
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  background: rgba(0,0,0,0.6);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 18px;
+  display: none;
+  z-index: 20;
+}
+
+/* Simulated brightness layer */
+#brightnessLayer {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0; /* 0 = full bright */
+  pointer-events: none;
+  transition: opacity 0.1s linear;
+}
+</style>
+</head>
+<body>
+
+<div id="playerContainer">
+  <iframe class="responsive-iframe"
+    src="https://drive.google.com/file/d/1gdteDDFAgScbthy5A_oBdQaTfiZg49RW/preview"
+    allow="autoplay" allowfullscreen></iframe>
+
+  <!-- Overlay feedback -->
+  <div id="overlay" class="overlay"></div>
+  <!-- Brightness simulation -->
+  <div id="brightnessLayer"></div>
+</div>
+
+<script>
+const container = document.getElementById("playerContainer");
+const overlay = document.getElementById("overlay");
+const brightnessLayer = document.getElementById("brightnessLayer");
+
+// States
+let startX = 0, startY = 0;
+let isDragging = false;
+let brightness = 1; // 1 = full, 0 = dark
+let volume = 0.5;   // simulate volume (0–1)
+
+function showOverlay(text) {
+  overlay.textContent = text;
+  overlay.style.display = "block";
+  clearTimeout(overlay.timeout);
+  overlay.timeout = setTimeout(() => overlay.style.display = "none", 700);
+}
+
+// Handle gestures
+function handleGesture(endX, endY) {
+  const dx = endX - startX;
+  const dy = endY - startY;
+  if (Math.abs(dy) > Math.abs(dx)) {
+    if (startX > container.clientWidth / 2) {
+      // Right side → volume
+      volume -= dy / container.clientHeight;
+      volume = Math.max(0, Math.min(1, volume));
+      showOverlay("🔊 Volume: " + Math.round(volume * 100) + "%");
+    } else {
+      // Left side → brightness
+      brightness -= dy / container.clientHeight;
+      brightness = Math.max(0, Math.min(1, brightness));
+      brightnessLayer.style.opacity = 1 - brightness;
+      showOverlay("☀ Brightness: " + Math.round(brightness * 100) + "%");
+    }
+  }
+}
+
+// Mouse events
+container.addEventListener("mousedown", e => {
+  startX = e.clientX;
+  startY = e.clientY;
+  isDragging = true;
+});
+container.addEventListener("mousemove", e => {
+  if (isDragging) handleGesture(e.clientX, e.clientY);
+});
+container.addEventListener("mouseup", () => isDragging = false);
+
+// Touch events
+container.addEventListener("touchstart", e => {
+  const t = e.touches[0];
+  startX = t.clientX;
+  startY = t.clientY;
+});
+container.addEventListener("touchmove", e => {
+  const t = e.touches[0];
+  handleGesture(t.clientX, t.clientY);
+});
+</script>
+
+</body>
+</html>
